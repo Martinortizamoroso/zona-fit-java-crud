@@ -22,18 +22,20 @@ public class Menu {
         System.out.println("""
                 Por favor elija una opción:
                 1) Listar clientes
-                2) Agregar un nuevo cliente
-                3) Modificar un cliente
-                4) Eliminar un cliente
-                5) Salir del sistema""");
+                2) Buscar cliente por ID
+                3) Agregar un nuevo cliente
+                4) Modificar un cliente
+                5) Eliminar un cliente
+                6) Salir del sistema""");
         var opt = terminal.nextInt();
         terminal.nextLine();
         switch (opt) {
             case 1 -> listarClientes(clienteDAO);
-            case 2 -> agregarCliente(terminal, clienteDAO);
-            case 3 -> modificarCliente(terminal, clienteDAO);
-            case 4 -> eliminarCliente(terminal, clienteDAO);
-            case 5 -> salirSistetema();
+            case 2 -> buscarClientePorId(terminal,clienteDAO);
+            case 3 -> agregarCliente(terminal, clienteDAO);
+            case 4 -> modificarCliente(terminal, clienteDAO);
+            case 5 -> eliminarCliente(terminal, clienteDAO);
+            case 6 -> salirSistetema();
             default -> {
                 System.out.println("Ingrese una opcion valida");
             }
@@ -42,21 +44,44 @@ public class Menu {
 
     public static void listarClientes(IClienteDAO clienteDAO) {
         try {
-            for (Cliente cliente : clienteDAO.listaClientes()) {
-                System.out.println(cliente);
+            var clientes = clienteDAO.listaClientes();
+            if (clientes.isEmpty()) {
+                System.out.println("No hay clientes registrados actualmente.");
+            }
+            for (Cliente cliente : clientes) {
+                printClienteFormat(cliente);
             }
         } catch (Exception e) {
             System.out.println("No se puede cargar la lista de clientes, error: " + e.getMessage());
         }
+    }
+    public  static void buscarClientePorId(Scanner terminal, IClienteDAO clienteDAO) {
+        try {
+            System.out.println("Ingrese el ID del cliente que desea buscar: ");
+            var id = terminal.nextInt();
+            terminal.nextLine();
+            Cliente cliente = new Cliente(id);
+            if(clienteDAO.buscarClientePorId(cliente)){
+                printClienteFormat(cliente);
+            }
+            else
+            {
+                System.out.println("Cliente no encontrado");
+            }
+
+        } catch (Exception e) {
+            System.out.println("No se ha podido realizar la busqueda, error: " + e.getMessage());
+        }
+
     }
 
     public static void agregarCliente(Scanner terminal, IClienteDAO clienteDAO) {
         try {
             Cliente nuevoCliente = new Cliente();
             System.out.print("Ingrese el nombre del nuevo cliente: ");
-            nuevoCliente.setNombre(terminal.next());
+            nuevoCliente.setNombre(terminal.nextLine());
             System.out.print("Ingrese el apellido del nuevo cliente: ");
-            nuevoCliente.setApellido(terminal.next());
+            nuevoCliente.setApellido(terminal.nextLine());
             System.out.print("Ingrese el codigo de membresia del nuevo cliente: ");
             nuevoCliente.setMembresia(terminal.nextInt());
             if (clienteDAO.agregarCliente(nuevoCliente))
@@ -87,7 +112,8 @@ public class Menu {
                 }
             }
             if (clienteEncontrado != null) {
-                System.out.println("cliente encontrado: " + clienteEncontrado);
+                System.out.println("cliente encontrado: ");
+                printClienteFormat(clienteEncontrado);
                 while (!terminado) {
                     System.out.println("""
                             Que campo desea modificar del nuevo cliente?:
@@ -167,5 +193,16 @@ public class Menu {
     {
         System.out.println("Saliendo del sistema :D ");
         exit = true;
+    }
+    public static void printClienteFormat(Cliente cliente) {
+        System.out.println("""
+            ID Cliente: %d
+            Nombre: %s
+            Apellido: %s
+            Tipo de membresia: %d
+            """.formatted(cliente.getId(),
+                cliente.getNombre(),
+                cliente.getApellido(),
+                cliente.getMembresia()));
     }
 }
