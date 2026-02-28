@@ -1,0 +1,15 @@
+# Java compilado
+*.class
+out/
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Sistema Operativo (macOS)
+.DS_Store
+
+# SEGURIDAD (Variables de entorno reales)
+.env
